@@ -39,7 +39,7 @@ from throttle_openai import async_call_open_ai_chat
 
 output, errors = await async_call_open_ai_chat(
     system_prompt="You are a sentiment analyzer. Analyze the sentiment of the given text.",
-    gpt_model='gpt-4',
+    gpt_model='gpt-4o-mini',
     pydantic_model=Sentiment_Prediction_Output,
     input_data=input_data,
     api_key=your_api_key
