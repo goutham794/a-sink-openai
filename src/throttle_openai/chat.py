@@ -33,12 +33,11 @@ class BadResponseException(Exception):
         super().__init__(message)
 
 
-def _construct_messages(prompt, text=None):
-    messages = []
-    if text is not None:
-        messages += [{"role": "system", "content": prompt}]
-
-    messages += [{"role": "user", "content": text or prompt}]
+def _construct_messages(prompt, user_message):
+    
+    messages = [{"role": "system", "content": prompt},
+                {"role": "user", "content": user_message}
+                ]
     return messages
 
 
@@ -85,9 +84,9 @@ async def _call_openai_chat(data, required_tokens):
 
 
 async def call_openai_chat(
-    prompt, text=None, pydantic_model=None, gpt_model=DEFAULT_MODEL, id=None
+    system_prompt, user_message=None, pydantic_model=None, gpt_model=DEFAULT_MODEL, id=None
 ):
-    messages = _construct_messages(prompt, text)
+    messages = _construct_messages(system_prompt, user_message)
     required_tokens = count_tokens(messages, model=gpt_model)
 
     data = {"model": gpt_model, "messages": messages}
@@ -116,15 +115,18 @@ async def call_openai_chat(
 
         gpt_called_at: datetime = datetime.now()
         gpt_tokens_used: GPTTokens
-        gpt_raw_input: str = text or prompt
+        gpt_raw_input: str = user_message
         gpt_model: str = data["model"]
         id: Optional[str]
 
     return ChatOutput(id=id, gpt_tokens_used=usage, **result_json)
 
 async def async_call_open_ai_chat(
-    prompt, input_data, api_key, pydantic_model=None, gpt_model=DEFAULT_MODEL
+    system_prompt, input_data, api_key, pydantic_model=None, gpt_model=DEFAULT_MODEL
 ):
+    if system_prompt is None:
+        system_prompt = "You are a helpful assistant."
+
     t0 = time.monotonic()
     rt.set_rate_limiter(MAX_REQUESTS_PER_MIN, MAX_TOKENS_PER_MIN)
 
@@ -134,7 +136,7 @@ async def async_call_open_ai_chat(
     logger.info(f"Processing {len(input_data)} calls to OpenAI asyncronously {msg_jobs}")
     tasks = [
         call_openai_chat(
-            prompt, pydantic_model=pydantic_model, gpt_model=gpt_model, **row
+            system_prompt, pydantic_model=pydantic_model, gpt_model=gpt_model, **row
         )
         for row in input_data
     ]

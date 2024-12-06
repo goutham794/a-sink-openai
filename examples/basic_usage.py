@@ -21,10 +21,11 @@ async def analyze_sentiment(reviews: List[str], system_prompt: str) -> Sentiment
     for review in reviews:
         input_data.append(
             {
-                "text": review
-                    })
+            "user_message": review[1],
+            "id": str(review[0]) # ID is not mandatory, but it's useful for tracking the output
+            })
 
-    output, errors = await async_call_open_ai_chat(prompt=system_prompt,
+    output, errors = await async_call_open_ai_chat(system_prompt=system_prompt,
                                                    gpt_model = 'gpt-4o-mini',
                                                    pydantic_model=Sentiment_Prediction_Output,
                                                    input_data=input_data,
@@ -45,15 +46,15 @@ if __name__ == "__main__":
         """)
 
     sentences = [
-        "I love this product! It's amazing.",
-        "This is the worst product I've ever used.",
-        "The product is okay, nothing special.",
-        "I've been using this product for a while and I'm satisfied with it.",
-        "I regret buying this product. It's a complete disaster.",
-        "The product is good, but it could be better.",
-        "I've had a great experience with this product. Highly recommended!",
-        "I'm not sure how I feel about this product. It has some good points, but also some bad points.",
-        "I've used this product for a month and I'm still not satisfied. I'm returning it.",
+        (1, "I like this product. It's good."),
+        (2, "I don't like this product. It's bad."),
+        (3, "This product is okay."),
+        (4, "I've been using this product for a while and I'm satisfied with it."),
+        (5, "I regret buying this product. It's a complete disaster."),
+        (6, "The product is good, but it could be better."),
+        (7, "I've had a great experience with this product. Highly recommended!"),
+        (8, "I'm not sure how I feel about this product. It has some good points, but also some bad points."),
+        (9, "I've used this product for a month and I'm still not satisfied. I'm returning it."),
     ]
 
     asyncio.run(analyze_sentiment(sentences, system_prompt))
