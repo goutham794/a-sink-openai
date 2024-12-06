@@ -1,15 +1,18 @@
 [tool.poetry]
-name = "a-sink-openai"
+name = "throttle-openai"
 version = "0.1.0"
 description = "Concurrent Fast OpenAI calls with Automatic Rate Limiting to avoid hitting limits. Structured Outputs with Pydantic Base Models."
 authors = ["Goutham <goutham794@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+packages = [{include = "throttle_openai", from = "src"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9"
 openai = "^1.57.0"
 aiohttp = "^3.11.9"
+loguru = "^0.7.2"
+tiktoken = "^0.8.0"
 
 
 [build-system]
