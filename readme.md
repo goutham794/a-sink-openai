@@ -1,4 +1,6 @@
-Credit: [Blogpost by Villoro](https://villoro.com/blog/async-openai-calls-rate-limiter/## Quick Start
+Credit: [Blogpost by Villoro](https://villoro.com/blog/async-openai-calls-rate-limiter/
+
+## Quick Start
 
 throttle-openai allows you to make concurrent OpenAI API calls with automatic rate limiting and structured outputs using Pydantic models.
 
