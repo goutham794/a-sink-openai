@@ -1,4 +1,4 @@
-Credit: [Blogpost by Villoro](https://villoro.com/blog/async-openai-calls-rate-limiter/
+Credit: [Blogpost by Villoro](https://villoro.com/blog/async-openai-calls-rate-limiter/)
 
 ## Quick Start
 
