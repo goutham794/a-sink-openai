@@ -57,3 +57,12 @@ if errors:
 - Structured Output: Uses Pydantic models for type-safe and validated outputs
 - Error Handling: Separate error collection for failed requests
 - ID Tracking: Optional ID field to track individual requests and responses
+
+## Environment Variables
+Set your OpenAI API key as an environment variable:
+```
+export OPENAI_API_KEY=your_api_key
+```
+
+## Complete Example
+Check out `examples/basic_usage.py` for a complete example including sentiment analysis of multiple product reviews.
