@@ -29,7 +29,7 @@ async def analyze_sentiment(reviews: List[str], system_prompt: str) -> Sentiment
                                                    gpt_model = 'gpt-4o-mini',
                                                    pydantic_model=Sentiment_Prediction_Output,
                                                    input_data=input_data,
-                                                   api_key=os.getenv("OPENAI_API_KEY_WF"))
+                                                   api_key=os.getenv("OPENAI_API_KEY"))
 
     print(output)
     # Print errors if any
