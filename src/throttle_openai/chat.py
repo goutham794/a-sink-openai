@@ -9,9 +9,9 @@ from loguru import logger
 import time
 import asyncio
 
-import async_openai.rate_limiter as rt
-import async_openai.utils as u
-from async_openai.tokens import count_tokens, GPTTokens
+import throttle_openai.rate_limiter as rt
+import throttle_openai.utils as u
+from throttle_openai.tokens import count_tokens, GPTTokens
 
 DEFAULT_MODEL = "gpt-4o-mini"
 ENDPOINT_CHAT = "https://api.openai.com/v1/chat/completions"
