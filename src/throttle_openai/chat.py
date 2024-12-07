@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Any, Dict
 
 import aiohttp
 from pydantic import BaseModel
@@ -31,14 +31,6 @@ class BaseChatResponse(BaseModel):
 class BadResponseException(Exception):
     def __init__(self, message="OpenAI API response is malformed or incomplete"):
         super().__init__(message)
-
-
-def _construct_messages(prompt, user_message):
-    
-    messages = [{"role": "system", "content": prompt},
-                {"role": "user", "content": user_message}
-                ]
-    return messages
 
 
 def get_json_schema_from_pydantic(pydantic_model):
@@ -84,9 +76,8 @@ async def _call_openai_chat(data, required_tokens):
 
 
 async def call_openai_chat(
-    system_prompt, user_message=None, pydantic_model=None, gpt_model=DEFAULT_MODEL, id=None
+    messages, pydantic_model=None, gpt_model=DEFAULT_MODEL, id=None
 ):
-    messages = _construct_messages(system_prompt, user_message)
     required_tokens = count_tokens(messages, model=gpt_model)
 
     data = {"model": gpt_model, "messages": messages}
@@ -115,17 +106,15 @@ async def call_openai_chat(
 
         gpt_called_at: datetime = datetime.now()
         gpt_tokens_used: GPTTokens
-        gpt_raw_input: str = user_message
+        gpt_raw_input: str = json.dumps(messages)
         gpt_model: str = data["model"]
         id: Optional[str]
 
     return ChatOutput(id=id, gpt_tokens_used=usage, **result_json)
 
-async def async_call_open_ai_chat(
-    system_prompt, input_data, api_key, pydantic_model=None, gpt_model=DEFAULT_MODEL
+async def async_batch_chat_completion(
+    batch_messages: List[Dict[str, Any]], api_key: str, pydantic_model=None, gpt_model=DEFAULT_MODEL
 ):
-    if system_prompt is None:
-        system_prompt = "You are a helpful assistant."
 
     t0 = time.monotonic()
     rt.set_rate_limiter(MAX_REQUESTS_PER_MIN, MAX_TOKENS_PER_MIN)
@@ -133,12 +122,15 @@ async def async_call_open_ai_chat(
     u.init_openai({'api_key': api_key})
 
     msg_jobs = f"(n_jobs={u.RATE_LIMITER_SEMAPHORE._value})"
-    logger.info(f"Processing {len(input_data)} calls to OpenAI asyncronously {msg_jobs}")
+    logger.info(f"Processing {len(batch_messages)} calls to OpenAI asyncronously {msg_jobs}")
     tasks = [
         call_openai_chat(
-            system_prompt, pydantic_model=pydantic_model, gpt_model=gpt_model, **row
+            messages = item['messages'],
+            pydantic_model=pydantic_model,
+            gpt_model=gpt_model, 
+            id = item.get('id')
         )
-        for row in input_data
+        for item in batch_messages
     ]
     results = await asyncio.gather(*tasks, return_exceptions=True)
 

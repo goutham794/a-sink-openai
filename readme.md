@@ -1,12 +1,19 @@
+# throttle-openai
+
+A Python library for making concurrent OpenAI API calls with automatic rate limiting and structured outputs using Pydantic models.
 Credit: [Blogpost by Villoro](https://villoro.com/blog/async-openai-calls-rate-limiter/)
+
+## Installation
+
+```bash
+pip install throttle-openai
+```
 
 ## Quick Start
 
-throttle-openai allows you to make concurrent OpenAI API calls with automatic rate limiting and structured outputs using Pydantic models.
+### 1. Define Your Output Structure
 
-### Basic Usage
-
-1. First, define your output structure using Pydantic:
+First, create a Pydantic model that defines your expected output structure:
 
 ```python
 from pydantic import BaseModel, Field
@@ -15,43 +22,60 @@ from typing import Literal
 class Sentiment_Prediction_Output(BaseModel):
     reasoning: str = Field(description="Reasoning for the sentiment prediction in one sentence.")
     sentiment: Literal['Positive', 'Negative', 'Neutral']
+
+    class Config:
+        title = "Sentiment Prediction Output"
+        description = "Sentiment prediction with reasoning."
 ```
 
-2. Create a list of inputs with optional IDs for tracking:
+### 2. Make API Calls
+
+Here's a complete example showing how to analyze sentiments for multiple product reviews:
 
 ```python
-input_data = [
-    {
-        "user_message": "I love this product!",
-        "id": "1"  # ID is optional but useful for tracking
-    },
-    {
-        "user_message": "Not satisfied with the quality.",
-        "id": "2"
-    }
-]
-```
+from throttle_openai import async_batch_chat_completion
+import asyncio
+import os
 
-3. Make concurrent API calls:
+async def analyze_sentiment():
+    # Prepare batch messages
+    batch_messages = [
+        {
+            "messages": [
+                {"role": "system", "content": "You are a sentiment analyzer. Analyze the sentiment of the given text."},
+                {"role": "user", "content": "I like this product. It's good."}
+            ],
+            "id": "1"  # id is optional
+        },
+        {
+            "messages": [
+                {"role": "system", "content": "You are a sentiment analyzer. Analyze the sentiment of the given text."},
+                {"role": "user", "content": "I don't like this product. It's bad."}
+            ],
+            "id": "2"
+        }
+    ]
 
-```python
-from throttle_openai import async_call_open_ai_chat
+    # Make concurrent API calls
+    output, errors = await async_batch_chat_completion(
+        batch_messages=batch_messages,
+        gpt_model='gpt-4o-mini',
+        pydantic_model=Sentiment_Prediction_Output,
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
 
-output, errors = await async_call_open_ai_chat(
-    system_prompt="You are a sentiment analyzer. Analyze the sentiment of the given text.",
-    gpt_model='gpt-4o-mini',
-    pydantic_model=Sentiment_Prediction_Output,
-    input_data=input_data,
-    api_key=your_api_key
-)
+    return output, errors
 
-# Output will be a list of Sentiment_Prediction_Output objects
-print(output)
+# Run the analysis
+output, errors = asyncio.run(analyze_sentiment())
 
-# Check for any errors
+# Process results
+print("Results:", output)
 if errors:
-    print(errors)
+    print("Errors:", errors)
 ```
+
+
 
 ## Features
 - Concurrent Processing: Automatically handles multiple API calls concurrently
@@ -67,4 +91,4 @@ export OPENAI_API_KEY=your_api_key
 ```
 
 ## Complete Example
-Check out `examples/basic_usage.py` for a complete example including sentiment analysis of multiple product reviews.
+Check out `examples/basic_usage_structured_output.py` for a complete example including sentiment analysis of multiple product reviews

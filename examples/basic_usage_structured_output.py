@@ -1,4 +1,4 @@
-from throttle_openai import async_call_open_ai_chat
+from throttle_openai import async_batch_chat_completion
 from pydantic import BaseModel, Field
 from typing import List, Literal
 from textwrap import dedent
@@ -15,21 +15,26 @@ class Sentiment_Prediction_Output(BaseModel):
         description = "Sentiment prediction with reasoning."
 
 
-async def analyze_sentiment(reviews: List[str], system_prompt: str) -> Sentiment_Prediction_Output:
+def create_messages_list(system_prompt: str, user_message: str) -> List[dict]:
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_message}
+    ]
 
-    input_data = []
-    for review in reviews:
-        input_data.append(
-            {
-            "user_message": review[1],
-            "id": str(review[0]) # ID is not mandatory, but it's useful for tracking the output
-            })
 
-    output, errors = await async_call_open_ai_chat(system_prompt=system_prompt,
-                                                   gpt_model = 'gpt-4o-mini',
-                                                   pydantic_model=Sentiment_Prediction_Output,
-                                                   input_data=input_data,
-                                                   api_key=os.getenv("OPENAI_API_KEY"))
+async def analyze_sentiment(sentences: List[str], system_prompt: str) -> Sentiment_Prediction_Output:
+
+    batch_messages = [
+        {"messages": create_messages_list(system_prompt, sentence[1]),
+         "id": str(sentence[0])}
+        for sentence in sentences
+    ]
+
+    output, errors = await async_batch_chat_completion(
+                                                batch_messages=batch_messages,
+                                                gpt_model = 'gpt-4o-mini',
+                                                pydantic_model=Sentiment_Prediction_Output,
+                                                api_key=os.getenv("OPENAI_API_KEY"))
 
     print(output)
     # Print errors if any
@@ -56,5 +61,6 @@ if __name__ == "__main__":
         (8, "I'm not sure how I feel about this product. It has some good points, but also some bad points."),
         (9, "I've used this product for a month and I'm still not satisfied. I'm returning it."),
     ]
+
 
     asyncio.run(analyze_sentiment(sentences, system_prompt))

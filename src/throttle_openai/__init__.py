@@ -1,1 +1,1 @@
-from .chat import async_call_open_ai_chat
+from .chat import async_batch_chat_completion
