@@ -13,3 +13,5 @@ htmlcov/
 .venv
 venv/
 ENV/
+repomix-output.txt
+src/throttle_openai/.python-version
