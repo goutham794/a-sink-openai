@@ -91,4 +91,4 @@ export OPENAI_API_KEY=your_api_key
 ```
 
 ## Complete Example
-Check out `examples/basic_usage_structured_output.py` for a complete example including sentiment analysis of multiple product reviews
+Check out `examples/basic_usage_structured_output.py` for a complete example featuring structured outputs.
