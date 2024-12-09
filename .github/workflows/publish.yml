@@ -7,21 +7,30 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      
     steps:
     - uses: actions/checkout@v3
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.9"
-    
+        
     - name: Install Poetry
       run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-    
+        pipx install poetry
+        
     - name: Configure Poetry
       run: |
         poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
-    
+        
+    - name: Install dependencies
+      run: |
+        poetry install
+        
     - name: Build and publish
       run: |
         poetry build
