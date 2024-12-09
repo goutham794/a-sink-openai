@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "throttle-openai"
-version = "0.1.0"
+version = "0.1.1"
 description = "Concurrent Fast OpenAI calls with Automatic Rate Limiting to avoid hitting limits. Structured Outputs with Pydantic Base Models."
 authors = ["Goutham <goutham794@gmail.com>"]
 license = "MIT"
