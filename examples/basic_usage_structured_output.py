@@ -33,8 +33,7 @@ async def analyze_sentiment(sentences: List[str], system_prompt: str) -> Sentime
     output, errors = await async_batch_chat_completion(
                                                 batch_messages=batch_messages,
                                                 gpt_model = 'gpt-4o-mini',
-                                                pydantic_model=Sentiment_Prediction_Output,
-                                                api_key=os.getenv("OPENAI_API_KEY"))
+                                                pydantic_model=Sentiment_Prediction_Output)
 
     print(output)
     # Print errors if any

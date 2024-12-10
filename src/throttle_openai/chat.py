@@ -8,6 +8,7 @@ from pydantic import Field
 from loguru import logger
 import time
 import asyncio
+import os
 
 import throttle_openai.rate_limiter as rt
 import throttle_openai.utils as u
@@ -113,8 +114,21 @@ async def call_openai_chat(
     return ChatOutput(id=id, gpt_tokens_used=usage, **result_json)
 
 async def async_batch_chat_completion(
-    batch_messages: List[Dict[str, Any]], api_key: str, pydantic_model=None, gpt_model=DEFAULT_MODEL
+    batch_messages: List[Dict[str, Any]], api_key: str = None, pydantic_model=None, gpt_model=DEFAULT_MODEL
 ):
+
+    if api_key is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if api_key is None:
+            raise ValueError(
+                "No API key provided and OPENAI_API_KEY environment variable is not set. "
+                "Please provide an API key or set the OPENAI_API_KEY environment variable."
+            )
+        else:
+            logger.info(
+                "No API key provided - using OPENAI_API_KEY environment variable. "
+            )
+
 
     t0 = time.monotonic()
     rt.set_rate_limiter(MAX_REQUESTS_PER_MIN, MAX_TOKENS_PER_MIN)
