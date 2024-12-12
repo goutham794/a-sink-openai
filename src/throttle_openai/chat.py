@@ -84,7 +84,7 @@ async def call_openai_chat(
     data = {"model": gpt_model, "messages": messages}
 
     if pydantic_model is not None:
-        data["response_format"] = get_json_schema_from_pydantic(pydantic_model)
+        data["response_format"] = u.get_json_response_format(pydantic_model)
 
     response = await _call_openai_chat(data, required_tokens)
 
