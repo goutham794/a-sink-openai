@@ -11,7 +11,9 @@ pip install throttle-openai
 
 ## Quick Start
 
-### 1. Define Your Output Structure
+### 1. Define Your Output Structure 
+
+Optional, only if you want structued outputs.
 
 First, create a Pydantic model that defines your expected output structure:
 
